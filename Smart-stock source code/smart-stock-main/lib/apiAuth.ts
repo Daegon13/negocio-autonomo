@@ -1,3 +1,7 @@
+import { NextResponse } from "next/server";
+import { getActiveStoreFromSession } from "@/lib/auth";
+import { getRoleFromRequest, type Role } from "@/lib/rbac";
+
 function parseBoolEnv(value: string | undefined, defaultValue: boolean) {
   if (value == null) return defaultValue;
   const v = value.trim().toLowerCase();
@@ -21,4 +25,34 @@ export function isLoginSystemEnabled() {
  */
 export function isDevLoginBypassEnabled() {
   return !isLoginSystemEnabled();
+}
+
+export function canMutate(role: Role) {
+  return role === "owner" || role === "manager" || role === "staff";
+}
+
+type ActiveStoreCtx = {
+  storeId: string;
+  role: Role;
+};
+
+type ActiveStoreHandler = (ctx: ActiveStoreCtx) => Promise<NextResponse>;
+
+export async function withActiveStore(req: Request, handler: ActiveStoreHandler): Promise<NextResponse>;
+export async function withActiveStore(handler: ActiveStoreHandler): Promise<NextResponse>;
+export async function withActiveStore(reqOrHandler: Request | ActiveStoreHandler, maybeHandler?: ActiveStoreHandler): Promise<NextResponse> {
+  const req = reqOrHandler instanceof Request ? reqOrHandler : null;
+  const handler = (req ? maybeHandler : reqOrHandler) as ActiveStoreHandler | undefined;
+
+  if (!handler) {
+    return NextResponse.json({ error: "Misconfigured withActiveStore usage" }, { status: 500 });
+  }
+
+  try {
+    const store = await getActiveStoreFromSession();
+    const role = req ? getRoleFromRequest(req) : "owner";
+    return await handler({ storeId: store.id, role });
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 }

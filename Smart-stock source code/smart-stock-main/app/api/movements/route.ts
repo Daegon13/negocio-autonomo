@@ -3,8 +3,8 @@ import { prisma } from "@/lib/db";
 import { MovementCreateSchema } from "@/lib/validators";
 import { canMutate, withActiveStore } from "@/lib/apiAuth";
 
-export async function GET() {
-  return withActiveStore(async ({ storeId }) => {
+export async function GET(req: Request) {
+  return withActiveStore(req, async ({ storeId }) => {
     const movements = await prisma.inventoryMovement.findMany({
       where: { storeId },
       orderBy: { createdAt: "desc" },
@@ -17,7 +17,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  return withActiveStore(async ({ storeId, role }) => {
+  return withActiveStore(req, async ({ storeId, role }) => {
     if (!canMutate(role)) return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
 
     const body = await req.json().catch(() => null);

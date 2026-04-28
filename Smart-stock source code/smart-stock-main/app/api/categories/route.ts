@@ -8,7 +8,7 @@ function slugify(s: string) {
 }
 
 export async function GET(req: Request) {
-  return withActiveStore(async ({ storeId }) => {
+  return withActiveStore(req, async ({ storeId }) => {
     const { searchParams } = new URL(req.url);
     const scope = searchParams.get("scope") || "";
     const categories = await prisma.category.findMany({ where: { storeId, ...(scope ? { scope } : {}) }, orderBy: [{ scope: "asc" }, { name: "asc" }] });
@@ -19,7 +19,7 @@ export async function GET(req: Request) {
 const CreateSchema = z.object({ storeId: z.string().optional(), scope: z.string().min(1), name: z.string().min(1), color: z.string().optional(), icon: z.string().optional() });
 
 export async function POST(req: Request) {
-  return withActiveStore(async ({ storeId, role }) => {
+  return withActiveStore(req, async ({ storeId, role }) => {
     if (!canMutate(role)) return NextResponse.json({ error: { message: "Sin permisos" } }, { status: 403 });
 
     const body = await req.json().catch(() => null);
