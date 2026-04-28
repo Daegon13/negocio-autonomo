@@ -5,7 +5,7 @@ import { hasBetaGateConfig, isBetaGateMisconfiguredInProd } from "@/lib/betaGate
 import { isDevLoginBypassEnabled } from "@/lib/authFlags";
 
 const APP_ROUTE_PREFIXES = [
-  "/dashboard", "/today", "/import", "/stock", "/orders", "/products", "/suppliers", "/categories", "/movements", "/reconcile", "/aliases", "/assistant", "/copilot", "/pos", "/purchases", "/tickets", "/logout", "/settings", "/select-store"
+  "/dashboard", "/today", "/import", "/stock", "/orders", "/products", "/suppliers", "/categories", "/movements", "/reconcile", "/aliases", "/assistant", "/copilot", "/pos", "/purchases", "/tickets", "/logout", "/settings", "/admin", "/select-store"
 ];
 
 function isProtectedPath(pathname: string) {

@@ -1,3 +1,7 @@
+import { NextResponse } from "next/server";
+import { getActiveStoreFromSession } from "@/lib/auth";
+import { getRoleFromRequest, type Role } from "@/lib/rbac";
+
 function parseBoolEnv(value: string | undefined, defaultValue: boolean) {
   if (value == null) return defaultValue;
   const v = value.trim().toLowerCase();
@@ -21,4 +25,23 @@ export function isLoginSystemEnabled() {
  */
 export function isDevLoginBypassEnabled() {
   return !isLoginSystemEnabled();
+}
+
+export function canMutate(role: Role) {
+  return role === "owner" || role === "manager" || role === "staff";
+}
+
+type ActiveStoreCtx = {
+  storeId: string;
+  role: Role;
+};
+
+export async function withActiveStore(handler: (ctx: ActiveStoreCtx) => Promise<NextResponse>) {
+  try {
+    const store = await getActiveStoreFromSession();
+    const role = getRoleFromRequest(new Request("http://localhost"));
+    return await handler({ storeId: store.id, role });
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 }
