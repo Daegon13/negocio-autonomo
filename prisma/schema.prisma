@@ -1,0 +1,353 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  OWNER
+  STAFF
+}
+
+enum ChannelProvider {
+  META
+  INSTAGRAM
+  FACEBOOK
+  WHATSAPP
+  LEAD_ADS
+  WEB_FORM
+  MANUAL
+}
+
+enum ChannelType {
+  INSTAGRAM_DM
+  FACEBOOK_MESSENGER
+  WHATSAPP
+  LEAD_ADS
+  WEB_FORM
+  MANUAL
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACTIVE
+  DISCONNECTED
+  ERROR
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  PENDING
+  BOOKED
+  LOST
+  CLOSED
+}
+
+enum ConversationStatus {
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum TaskType {
+  FOLLOW_UP
+  REMINDER
+  CONFIRM_BOOKING
+  REACTIVATE_LEAD
+}
+
+enum TaskStatus {
+  OPEN
+  DONE
+  DISMISSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ActivityActorType {
+  USER
+  SYSTEM
+  AI
+}
+
+enum ObjectionCategory {
+  PRICE
+  TIMING
+  TRUST
+  NO_RESPONSE
+  OTHER
+}
+
+model Business {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  verticalType String?
+  timezone     String   @default("America/Montevideo")
+  contactPhone String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  users              User[]
+  channelConnections ChannelConnection[]
+  contacts           Contact[]
+  leads              Lead[]
+  conversations      Conversation[]
+  messages           MessageEvent[]
+  bookings           Booking[]
+  availabilityRules  AvailabilityRule[]
+  followUpTasks      FollowUpTask[]
+  activityLogs       ActivityLog[]
+  objectionSignals   ObjectionSignal[]
+}
+
+model User {
+  id         String   @id @default(cuid())
+  businessId String
+  name       String?
+  email      String
+  role       UserRole @default(OWNER)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, email])
+  @@index([businessId])
+}
+
+model ChannelConnection {
+  id                String           @id @default(cuid())
+  businessId        String
+  provider          ChannelProvider
+  channelType       ChannelType
+  externalAccountId String?
+  status            ConnectionStatus @default(PENDING)
+  scopesJson        Json?
+  metadataJson      Json?
+  lastSyncedAt      DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+
+  @@index([businessId])
+  @@index([provider, channelType])
+}
+
+model Contact {
+  id               String   @id @default(cuid())
+  businessId       String
+  displayName      String
+  phone            String?
+  email            String?
+  externalRefsJson Json?
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  leads         Lead[]
+  conversations Conversation[]
+  bookings      Booking[]
+
+  @@index([businessId])
+  @@index([phone])
+  @@index([email])
+}
+
+model Lead {
+  id              String           @id @default(cuid())
+  businessId      String
+  contactId       String?
+  sourceProvider  ChannelProvider?
+  sourceChannel   ChannelType?
+  externalLeadId  String?
+  status          LeadStatus       @default(NEW)
+  serviceInterest String?
+  summary         String?
+  priority        Priority         @default(MEDIUM)
+  notes           String?
+  rawPayload      Json?
+  lastContactAt   DateTime?
+  nextActionAt    DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  business         Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  contact          Contact?          @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  conversations    Conversation[]
+  bookings         Booking[]
+  followUpTasks    FollowUpTask[]
+  objectionSignals ObjectionSignal[]
+
+  @@index([businessId])
+  @@index([contactId])
+  @@index([status])
+  @@index([sourceProvider, sourceChannel])
+}
+
+model Conversation {
+  id                  String             @id @default(cuid())
+  businessId          String
+  channelConnectionId String?
+  contactId           String?
+  leadId              String?
+  externalThreadId    String?
+  status              ConversationStatus @default(OPEN)
+  lastMessageAt       DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  business          Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  channelConnection ChannelConnection? @relation(fields: [channelConnectionId], references: [id], onDelete: SetNull)
+  contact           Contact?           @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  lead              Lead?              @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  messages          MessageEvent[]
+  objectionSignals  ObjectionSignal[]
+
+  @@index([businessId])
+  @@index([contactId])
+  @@index([leadId])
+  @@index([channelConnectionId])
+}
+
+model MessageEvent {
+  id                String           @id @default(cuid())
+  businessId        String
+  conversationId    String
+  providerMessageId String?
+  direction         MessageDirection
+  payloadType       String?
+  content           String?
+  rawPayload        Json?
+  createdAt         DateTime         @default(now())
+
+  business     Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([conversationId])
+  @@index([providerMessageId])
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  businessId  String
+  contactId   String?
+  leadId      String?
+  serviceName String
+  startsAt    DateTime
+  endsAt      DateTime
+  status      BookingStatus @default(PENDING)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  contact  Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  lead     Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([businessId])
+  @@index([contactId])
+  @@index([leadId])
+  @@index([startsAt])
+  @@index([status])
+}
+
+model AvailabilityRule {
+  id              String   @id @default(cuid())
+  businessId      String
+  dayOfWeek       Int
+  startTime       String
+  endTime         String
+  slotDurationMin Int      @default(30)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, dayOfWeek, isActive])
+}
+
+model FollowUpTask {
+  id              String     @id @default(cuid())
+  businessId      String
+  leadId          String
+  type            TaskType   @default(FOLLOW_UP)
+  status          TaskStatus @default(OPEN)
+  priority        Priority   @default(MEDIUM)
+  dueAt           DateTime?
+  suggestedAction String?
+  reason          String?
+  completedAt     DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  lead     Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([leadId])
+  @@index([status, priority, dueAt])
+}
+
+model ActivityLog {
+  id          String            @id @default(cuid())
+  businessId  String
+  entityType  String
+  entityId    String?
+  actionType  String
+  actorType   ActivityActorType @default(SYSTEM)
+  actorId     String?
+  payloadJson Json?
+  createdAt   DateTime          @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, createdAt])
+  @@index([entityType, entityId])
+}
+
+model ObjectionSignal {
+  id             String            @id @default(cuid())
+  businessId     String
+  leadId         String?
+  conversationId String?
+  category       ObjectionCategory @default(OTHER)
+  confidence     Float             @default(0.5)
+  evidenceText   String?
+  createdAt      DateTime          @default(now())
+
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  lead         Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, category, createdAt])
+  @@index([leadId])
+  @@index([conversationId])
+}
