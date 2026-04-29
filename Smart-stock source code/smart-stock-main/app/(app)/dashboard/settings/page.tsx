@@ -1,14 +1,24 @@
+import Link from "next/link";
 import { Card, CardContent, CardHeader } from "@/components/ui";
 import { getOrCreateDefaultStore } from "@/lib/defaultStore";
+import { prisma } from "@/lib/db";
 
 export default async function DashboardSettingsPage() {
-  const store = await getOrCreateDefaultStore();
+  const activeStore = await getOrCreateDefaultStore();
+  const store = await prisma.store.findUnique({
+    where: { id: activeStore.id },
+    select: {
+      name: true,
+      organization: { select: { name: true } },
+      franchise: { select: { name: true } }
+    }
+  });
 
   const profile = {
-    name: store.name,
-    vertical: "Servicios locales",
-    phone: "+54 11 0000-0000",
-    timezone: "America/Argentina/Buenos_Aires"
+    name: store?.name ?? activeStore.name,
+    vertical: store?.franchise?.name ?? store?.organization?.name ?? "Servicios locales",
+    phone: "No configurado",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
   };
 
   return (
@@ -24,6 +34,11 @@ export default async function DashboardSettingsPage() {
           <Field label="Vertical" value={profile.vertical} />
           <Field label="Teléfono" value={profile.phone} />
           <Field label="Zona horaria" value={profile.timezone} />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="p-4 text-sm text-slate-600">
+          Esta vista es de solo lectura por ahora. Podés continuar en <Link className="text-indigo-700 underline" href="/settings/business">Settings del negocio</Link> para ver contexto tenant actual.
         </CardContent>
       </Card>
     </div>

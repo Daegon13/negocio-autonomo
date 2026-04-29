@@ -23,7 +23,7 @@ export default async function DashboardLeadsPage() {
       ) : (
         <div className="space-y-2">
           {leads.map((lead) => (
-            <Card key={lead.id}><CardContent className="p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-slate-900">{lead.name}</p><p className="text-xs text-slate-500">{lead.contact} · {lead.summary || "Sin resumen"}</p></div><Badge tone="indigo">{lead.status}</Badge></div></CardContent></Card>
+            <Card key={lead.id}><CardContent className="p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-slate-900">{lead.name}</p><p className="text-xs text-slate-500">{lead.contact} · {lead.summary || "Sin resumen"}</p><p className="text-xs text-slate-500">{lead.source || "Origen sin especificar"} · Última actividad: {new Date(lead.lastActivityAt).toLocaleString()}</p></div><Badge tone="indigo">{lead.status}</Badge></div></CardContent></Card>
           ))}
         </div>
       )}
