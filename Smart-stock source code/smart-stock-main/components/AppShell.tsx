@@ -8,10 +8,12 @@ import { Badge, Button, Sticker } from "@/components/ui";
 type NavItem = { href: string; label: string; icon: string; hint?: string };
 
 const CORE_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Inicio", icon: "🏠", hint: "Resumen operativo" },
-  { href: "/today", label: "Operación diaria", icon: "🧭", hint: "Siguiente paso" },
-  { href: "/settings/business", label: "Negocio", icon: "🏢", hint: "Tenant y ajustes" },
-  { href: "/settings/team", label: "Equipo", icon: "👥", hint: "Roles y accesos" }
+  { href: "/dashboard", label: "Dashboard", icon: "🏠", hint: "Resumen" },
+  { href: "/dashboard/leads", label: "Leads", icon: "📥", hint: "Bandeja" },
+  { href: "/dashboard/bookings", label: "Agenda / Reservas", icon: "📅", hint: "Próximamente" },
+  { href: "/dashboard/follow-up", label: "Seguimiento", icon: "✅", hint: "Próximamente" },
+  { href: "/dashboard/channels", label: "Canales", icon: "📲", hint: "Próximamente" },
+  { href: "/dashboard/settings", label: "Settings", icon: "⚙️", hint: "Negocio" }
 ];
 
 const ADMIN_NAV: NavItem[] = [
