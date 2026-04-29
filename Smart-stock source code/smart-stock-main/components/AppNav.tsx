@@ -2,6 +2,7 @@ import Link from "next/link";
 
 const nav = [
   { href: "/today", label: "Hoy" },
+  { href: "/leads", label: "Leads" },
   { href: "/import", label: "Importar ventas" }
 ];
 

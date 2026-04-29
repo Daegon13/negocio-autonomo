@@ -29,6 +29,8 @@ model Store {
   // Tickets / ventas importadas
   ticketImports TicketImportBatch[]
   tickets       Ticket[]
+  leads         Lead[]
+  leadEvents    LeadEvent[]
 
   // Aliases para matcheo (códigos/nombres) desde POS
   productAliases ProductAlias[]
@@ -106,6 +108,48 @@ model StoreMember {
 
   @@unique([userId, storeId])
   @@index([storeId])
+}
+
+model Lead {
+  id String @id @default(cuid())
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  name     String
+  contact  String
+  summary  String?
+  source   String?
+  priority String  @default("MEDIUM")
+  status   String  @default("NEW")
+  nextStep String?
+
+  lastActivityAt DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  events LeadEvent[]
+
+  @@index([storeId, status])
+  @@index([storeId, lastActivityAt])
+}
+
+model LeadEvent {
+  id String @id @default(cuid())
+
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  type    String
+  message String
+
+  createdAt DateTime @default(now())
+
+  @@index([leadId, createdAt])
+  @@index([storeId, createdAt])
 }
 
 model Account {
