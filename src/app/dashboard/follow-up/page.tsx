@@ -1,33 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { prisma } from "@/lib/db/prisma";
+import { getDemoBusinessId } from "@/lib/demo-data";
 
-export const metadata: Metadata = {
-  title: "Seguimiento",
-  description: "Cola de seguimiento comercial para convertir leads en reservas.",
-};
+export const metadata: Metadata = { title: "Seguimiento", description: "Cola de seguimiento comercial para convertir leads en reservas." };
 
-export default function FollowUpPage() {
-  return (
-    <section className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-semibold text-white">Seguimiento</h2>
-        <p className="mt-2 text-slate-300">Priorizá próximas acciones para no perder oportunidades.</p>
-      </div>
-
-      <article className="rounded-xl border border-dashed border-slate-700 bg-slate-900 p-6">
-        <h3 className="text-lg font-medium text-white">Sin tareas de seguimiento</h3>
-        <p className="mt-2 text-slate-300">
-          A medida que ingresen leads, este espacio mostrará tareas pendientes con fecha objetivo y canal recomendado.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link href="/dashboard/leads" className="rounded-lg border border-slate-700 px-4 py-2 text-sm hover:border-cyan-300">
-            Ver leads
-          </Link>
-          <Link href="/dashboard/bookings" className="rounded-lg border border-slate-700 px-4 py-2 text-sm hover:border-cyan-300">
-            Ver reservas
-          </Link>
-        </div>
-      </article>
-    </section>
-  );
+export default async function FollowUpPage() {
+  const businessId = await getDemoBusinessId();
+  const tasks = businessId ? await prisma.followUpTask.findMany({ where: { businessId }, include: { lead: { include: { contact: true } } }, orderBy: [{ status: "asc" }, { dueAt: "asc" }] }) : [];
+  return <section className="space-y-6"><h2 className="text-3xl font-semibold text-white">Seguimiento ({tasks.length})</h2><ul className="space-y-3">{tasks.map((task) => <li key={task.id} className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-slate-200">{task.lead.contact?.displayName ?? task.lead.id} · {task.type} · {task.status}</li>)}</ul></section>;
 }

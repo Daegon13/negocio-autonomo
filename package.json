@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:seed": "pnpm exec prisma db seed",
+    "db:reset:demo": "pnpm exec prisma migrate reset --force && pnpm exec prisma db seed"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -29,5 +31,8 @@
     "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
   }
 }
