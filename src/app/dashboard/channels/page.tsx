@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Canales",
+  description: "Estado de canales de captura para mensajes y leads entrantes.",
+};
 
 export default function ChannelsPage() {
   return (

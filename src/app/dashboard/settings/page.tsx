@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Ajustes",
+  description: "Configuración base del espacio de trabajo de Negocio Autónomo.",
+};
 
 export default function SettingsPage() {
   return (

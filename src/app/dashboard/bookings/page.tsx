@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Reservas",
+  description: "Agenda de reservas con estados y próximos pasos de atención.",
+};
 
 export default function BookingsPage() {
   return (

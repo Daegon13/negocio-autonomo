@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Resumen",
+  description: "Vista general de leads, seguimiento, reservas y canales de Negocio Autónomo.",
+};
 
 const crossLinks = [
   { href: "/dashboard/leads", label: "Leads" },

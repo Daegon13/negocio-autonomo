@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ReactNode } from "react";
+import { NavLink } from "./nav-link";
 
 const navItems = [
   { href: "/dashboard", label: "Resumen" },
@@ -19,15 +20,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <h1 className="mt-2 text-xl font-semibold text-white">Panel operativo</h1>
           <p className="mt-1 text-sm text-slate-300">Leads, seguimiento y reservas en una sola vista.</p>
 
-          <nav className="mt-6 grid gap-2">
+          <nav className="mt-6 grid gap-2" aria-label="Navegación principal del dashboard">
             {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200"
-              >
+              <NavLink key={item.href} href={item.href}>
                 {item.label}
-              </Link>
+              </NavLink>
             ))}
           </nav>
         </aside>

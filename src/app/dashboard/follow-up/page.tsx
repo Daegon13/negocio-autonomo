@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Seguimiento",
+  description: "Cola de seguimiento comercial para convertir leads en reservas.",
+};
 
 export default function FollowUpPage() {
   return (

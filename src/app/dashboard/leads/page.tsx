@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Leads",
+  description: "Gestión de leads entrantes por canal, estado y prioridad.",
+};
 
 export default function LeadsPage() {
   return (
