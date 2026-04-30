@@ -32,6 +32,8 @@ model Store {
   leads         Lead[]
   leadEvents    LeadEvent[]
   followUpTasks FollowUpTask[]
+  bookings      Booking[]
+  activityLogs  ActivityLog[]
 
   // Aliases para matcheo (códigos/nombres) desde POS
   productAliases ProductAlias[]
@@ -44,6 +46,7 @@ model Store {
   memberships        StoreMember[]
   channelConnections ChannelConnection[]
   inboundEvents      InboundEvent[]
+  AvailabilityRule   AvailabilityRule[]
 
   @@index([organizationId])
   @@index([franchiseId])
@@ -133,6 +136,8 @@ model Lead {
 
   events        LeadEvent[]
   followUpTasks FollowUpTask[]
+  bookings      Booking[]
+  activityLogs  ActivityLog[]
 
   @@index([storeId, status])
   @@index([storeId, lastActivityAt])
@@ -181,6 +186,76 @@ model FollowUpTask {
 
   @@index([storeId, status, dueAt])
   @@index([leadId, taskType, status])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model Booking {
+  id String @id @default(cuid())
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id])
+
+  contactId String?
+
+  startsAt DateTime
+  endsAt   DateTime
+  status   BookingStatus @default(PENDING)
+  notes    String?
+
+  confirmedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([storeId, startsAt])
+  @@index([storeId, status, startsAt])
+  @@index([leadId])
+  @@index([contactId])
+}
+
+model AvailabilityRule {
+  id String @id @default(cuid())
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId, dayOfWeek, isActive])
+}
+
+model ActivityLog {
+  id String @id @default(cuid())
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  leadId    String?
+  bookingId String?
+
+  type    String
+  message String
+  payload String?
+
+  createdAt DateTime @default(now())
+  Lead      Lead?    @relation(fields: [leadId], references: [id])
+
+  @@index([storeId, createdAt])
+  @@index([leadId, createdAt])
+  @@index([bookingId, createdAt])
 }
 
 model Account {
