@@ -1,6 +1,7 @@
 import type {
   ActivityActorType,
   BookingStatus,
+  InboundEventStatus,
   LeadStatus,
   Priority,
   TaskStatus,
@@ -71,4 +72,14 @@ export type CreateActivityLogInput = {
   actorType?: ActivityActorType;
   actorId?: string;
   payloadJson?: unknown;
+};
+
+
+export type CreateInboundEventInput = {
+  businessId: string;
+  source: string;
+  eventType: string;
+  payload: unknown;
+  status?: InboundEventStatus;
+  receivedAt?: Date;
 };

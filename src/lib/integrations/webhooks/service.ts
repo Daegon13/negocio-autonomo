@@ -15,6 +15,7 @@ export async function receiveInboundEvent(event: ParsedWebhookEvent) {
     data: {
       businessId: connection.businessId,
       channelConnectionId: connection.id,
+      source: event.provider,
       provider: event.provider,
       eventType: event.eventType,
       payload: event.payload as any,

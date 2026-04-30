@@ -1,3 +1,4 @@
+import { ActivityActorType, InboundEventStatus } from "../../../../generated/prisma";
 import { operationalRepository } from "../repositories/operationalRepository";
 import type {
   CreateActivityLogInput,
@@ -6,6 +7,7 @@ import type {
   CreateContactInput,
   CreateConversationInput,
   CreateFollowUpTaskInput,
+  CreateInboundEventInput,
   CreateLeadInput,
 } from "../types/operational";
 import { assertDateRange, assertRequiredString } from "../validation/operational";
@@ -63,6 +65,33 @@ export const operationalService = {
     assertRequiredString(input.businessId, "businessId");
     assertRequiredString(input.leadId, "leadId");
     return operationalRepository.createFollowUpTask(input);
+  },
+
+
+  async receiveInboundEvent(input: CreateInboundEventInput) {
+    assertRequiredString(input.businessId, "businessId");
+    assertRequiredString(input.source, "source");
+    assertRequiredString(input.eventType, "eventType");
+
+    const inbound = await operationalRepository.createInboundEvent({
+      businessId: input.businessId,
+      source: input.source,
+      eventType: input.eventType,
+      payload: input.payload,
+      status: input.status ?? InboundEventStatus.PENDING,
+      receivedAt: input.receivedAt,
+    });
+
+    await operationalRepository.createActivityLog({
+      businessId: input.businessId,
+      entityType: "InboundEvent",
+      entityId: inbound.id,
+      actionType: "INBOUND_EVENT_RECEIVED",
+      actorType: ActivityActorType.SYSTEM,
+      payloadJson: { source: input.source, eventType: input.eventType },
+    });
+
+    return inbound;
   },
 
   registerActivityLog(input: CreateActivityLogInput) {
