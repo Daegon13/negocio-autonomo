@@ -39,8 +39,10 @@ model Store {
   categories Category[]
 
   // Auditoría (acciones del Copiloto y del usuario)
-  auditLogs   AuditLog[]
-  memberships StoreMember[]
+  auditLogs          AuditLog[]
+  memberships        StoreMember[]
+  channelConnections ChannelConnection[]
+  inboundEvents      InboundEvent[]
 
   @@index([organizationId])
   @@index([franchiseId])
@@ -470,4 +472,50 @@ model AuditLog {
   @@index([storeId])
   @@index([action])
   @@index([createdAt])
+}
+
+enum InboundEventStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+model ChannelConnection {
+  id String @id @default(cuid())
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  provider          String
+  externalAccountId String
+  metadata          String?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  inboundEvents InboundEvent[]
+
+  @@unique([provider, externalAccountId])
+  @@index([storeId, provider])
+}
+
+model InboundEvent {
+  id String @id @default(cuid())
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  channelConnectionId String?
+  channelConnection   ChannelConnection? @relation(fields: [channelConnectionId], references: [id])
+
+  provider   String
+  eventType  String?
+  payload    String
+  receivedAt DateTime           @default(now())
+  status     InboundEventStatus @default(PENDING)
+  attempts   Int                @default(0)
+  lastError  String?
+
+  @@index([storeId, provider, status])
+  @@index([channelConnectionId])
 }
