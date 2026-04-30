@@ -31,6 +31,9 @@ model Store {
   tickets       Ticket[]
   leads         Lead[]
   leadEvents    LeadEvent[]
+  followUpTasks FollowUpTask[]
+  bookings      Booking[]
+  activityLogs  ActivityLog[]
 
   // Aliases para matcheo (códigos/nombres) desde POS
   productAliases ProductAlias[]
@@ -39,8 +42,11 @@ model Store {
   categories Category[]
 
   // Auditoría (acciones del Copiloto y del usuario)
-  auditLogs   AuditLog[]
-  memberships StoreMember[]
+  auditLogs          AuditLog[]
+  memberships        StoreMember[]
+  channelConnections ChannelConnection[]
+  inboundEvents      InboundEvent[]
+  AvailabilityRule   AvailabilityRule[]
 
   @@index([organizationId])
   @@index([franchiseId])
@@ -128,7 +134,10 @@ model Lead {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  events LeadEvent[]
+  events        LeadEvent[]
+  followUpTasks FollowUpTask[]
+  bookings      Booking[]
+  activityLogs  ActivityLog[]
 
   @@index([storeId, status])
   @@index([storeId, lastActivityAt])
@@ -150,6 +159,103 @@ model LeadEvent {
 
   @@index([leadId, createdAt])
   @@index([storeId, createdAt])
+}
+
+enum FollowUpTaskStatus {
+  OPEN
+  CLOSED
+}
+
+model FollowUpTask {
+  id String @id @default(cuid())
+
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  taskType String
+  priority String             @default("MEDIUM")
+  dueAt    DateTime
+  status   FollowUpTaskStatus @default(OPEN)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  closedAt  DateTime?
+
+  @@index([storeId, status, dueAt])
+  @@index([leadId, taskType, status])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model Booking {
+  id String @id @default(cuid())
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id])
+
+  contactId String?
+
+  startsAt DateTime
+  endsAt   DateTime
+  status   BookingStatus @default(PENDING)
+  notes    String?
+
+  confirmedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([storeId, startsAt])
+  @@index([storeId, status, startsAt])
+  @@index([leadId])
+  @@index([contactId])
+}
+
+model AvailabilityRule {
+  id String @id @default(cuid())
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId, dayOfWeek, isActive])
+}
+
+model ActivityLog {
+  id String @id @default(cuid())
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  leadId    String?
+  bookingId String?
+
+  type    String
+  message String
+  payload String?
+
+  createdAt DateTime @default(now())
+  Lead      Lead?    @relation(fields: [leadId], references: [id])
+
+  @@index([storeId, createdAt])
+  @@index([leadId, createdAt])
+  @@index([bookingId, createdAt])
 }
 
 model Account {
@@ -470,4 +576,50 @@ model AuditLog {
   @@index([storeId])
   @@index([action])
   @@index([createdAt])
+}
+
+enum InboundEventStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+model ChannelConnection {
+  id String @id @default(cuid())
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  provider          String
+  externalAccountId String
+  metadata          String?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  inboundEvents InboundEvent[]
+
+  @@unique([provider, externalAccountId])
+  @@index([storeId, provider])
+}
+
+model InboundEvent {
+  id String @id @default(cuid())
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  channelConnectionId String?
+  channelConnection   ChannelConnection? @relation(fields: [channelConnectionId], references: [id])
+
+  provider   String
+  eventType  String?
+  payload    String
+  receivedAt DateTime           @default(now())
+  status     InboundEventStatus @default(PENDING)
+  attempts   Int                @default(0)
+  lastError  String?
+
+  @@index([storeId, provider, status])
+  @@index([channelConnectionId])
 }
