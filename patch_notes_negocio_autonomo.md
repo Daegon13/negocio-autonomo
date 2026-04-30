@@ -846,3 +846,44 @@ Y después de eso:
 ### primer prompt maestro para Codex
 para ejecutar **Patch 00 + Patch 01** sin fricción.
 
+
+---
+
+## PATCH 06 — Endpoint interno de eventos normalizados (testing)
+
+### Nuevo endpoint
+- **Ruta:** `POST /api/ingestion/events`
+- **Uso:** recepción interna de eventos normalizados de prueba.
+- **Auth:** header `Authorization: Bearer <INTERNAL_INGESTION_TOKEN>`
+
+### Contrato JSON
+```json
+{
+  "businessId": "cm123business",
+  "source": "manual_test",
+  "eventType": "lead.created",
+  "payload": {
+    "leadExternalId": "lead_001",
+    "contact": {
+      "name": "Ana Pérez",
+      "phone": "+59899111222"
+    },
+    "message": "Quiero reservar para mañana"
+  }
+}
+```
+
+### Respuesta esperada (202)
+```json
+{
+  "ok": true,
+  "inboundEventId": "cm123event",
+  "status": "PENDING",
+  "receivedAt": "2026-04-30T12:00:00.000Z"
+}
+```
+
+### Errores
+- `401 unauthorized`: token ausente o inválido.
+- `400 invalid_json`: body no parseable.
+- `400 invalid_payload`: faltan `businessId`, `source`, `eventType` o `payload`.

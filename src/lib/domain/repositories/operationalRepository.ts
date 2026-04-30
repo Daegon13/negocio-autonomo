@@ -5,6 +5,7 @@ import type {
   Contact,
   Conversation,
   FollowUpTask,
+  InboundEvent,
   Lead,
   Prisma,
 } from "../../../../generated/prisma";
@@ -16,6 +17,7 @@ import type {
   CreateContactInput,
   CreateConversationInput,
   CreateFollowUpTaskInput,
+  CreateInboundEventInput,
   CreateLeadInput,
 } from "../types/operational";
 
@@ -75,6 +77,11 @@ export const operationalRepository = {
 
   createFollowUpTask(data: CreateFollowUpTaskInput): Promise<FollowUpTask> {
     return prisma.followUpTask.create({ data });
+  },
+
+
+  createInboundEvent(data: CreateInboundEventInput): Promise<InboundEvent> {
+    return prisma.inboundEvent.create({ data });
   },
 
   createActivityLog(data: CreateActivityLogInput): Promise<ActivityLog> {

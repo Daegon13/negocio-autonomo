@@ -345,7 +345,8 @@ model InboundEvent {
   id                  String             @id @default(cuid())
   businessId          String
   channelConnectionId String?
-  provider            ChannelProvider
+  source              String
+  provider            ChannelProvider?
   eventType           String
   payload             Json
   receivedAt          DateTime           @default(now())
@@ -358,7 +359,8 @@ model InboundEvent {
   business          Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
   channelConnection ChannelConnection? @relation(fields: [channelConnectionId], references: [id], onDelete: SetNull)
 
-  @@index([businessId, provider, status])
+  @@index([businessId, source, status])
+  @@index([provider])
   @@index([channelConnectionId])
   @@index([receivedAt])
 }
