@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Negocio Autónomo (MVP)
 
-## Getting Started
+MVP para negocios de servicios locales. El producto ayuda a capturar mensajes/leads entrantes, dar seguimiento, convertir en reservas y tener visibilidad operativa básica.
 
-First, run the development server:
+## Pre-check obligatorio
+
+Antes de cualquier cambio, ejecutar:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pwd
+git rev-parse --show-toplevel
+node -p "require('./package.json').name"
+rg --files src/app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Flujo principal
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`channel connected → inbound event → normalization → lead/conversation → follow-up → booking → metrics`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Rutas visibles (Next.js App Router)
 
-## Learn More
+- `/` → `src/app/page.tsx`
+- `/dashboard` → `src/app/dashboard/page.tsx`
+- `/dashboard/leads` → `src/app/dashboard/leads/page.tsx`
+- `/dashboard/bookings` → `src/app/dashboard/bookings/page.tsx`
+- `/dashboard/follow-up` → `src/app/dashboard/follow-up/page.tsx`
+- `/dashboard/channels` → `src/app/dashboard/channels/page.tsx`
+- `/dashboard/settings` → `src/app/dashboard/settings/page.tsx`
 
-To learn more about Next.js, take a look at the following resources:
+## Comandos (pnpm)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm install
+pnpm dev
+pnpm exec prisma format
+pnpm exec prisma validate
+pnpm exec prisma generate
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Alcance MVP
 
-## Deploy on Vercel
+- Captura y gestión de leads entrantes.
+- Seguimiento comercial (follow-up).
+- Gestión de reservas (bookings).
+- Métricas operativas simples.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## No alcance (por ahora)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Gestión de inventario/stock.
+- Automatizaciones omnicanal avanzadas.
+- Simulaciones complejas.
+- Funcionalidades enterprise fuera de MVP.
+
+## Contexto legacy
+
+Smart Stock se conserva **solo como referencia histórica de solo lectura** y no forma parte del producto activo Negocio Autónomo.
+
+
+## Estrategia para assets legacy
+
+- `Smart-stock source code/` está fuera del alcance activo y se mantiene ignorada por git.
+- `archive/legacy-smart-stock-reference/` se conserva como referencia histórica **solo lectura**.
+- Cualquier trabajo de producto debe hacerse en la raíz activa de Negocio Autónomo.

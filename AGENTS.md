@@ -1,133 +1,93 @@
-@'
 # AGENTS.md — Negocio Autónomo
 
-## Project identity
+## Proyecto activo
 
-This repository root is the active project.
+- **Proyecto activo:** raíz de este repositorio (Negocio Autónomo).
+- Verificación rápida de contexto antes de cambios:
 
-The active product is:
-
-**Negocio Autónomo**
-
-Negocio Autónomo is an MVP for local service businesses. It helps businesses capture incoming leads/messages, organize leads, follow up, schedule bookings, and understand basic operational metrics.
-
-## Critical instruction
-
-Do NOT treat Smart Stock as the active project.
-
-Smart Stock is only legacy/reference context. It may have inspired parts of the architecture, but it is not the product being implemented in this repository.
-
-If a folder, document, branch, file, or module mentions Smart Stock, treat it as legacy unless the user explicitly says otherwise.
-
-## Active repository root
-
-The active repository root is the directory containing:
-
-- package.json
-- prisma/schema.prisma
-- prisma.config.ts
-- src/app
-- src/modules
-- ARCHITECTURE.md
-- PATCH_NOTES.md
-
-Before making changes, verify:
-
-```powershell
-Get-Location
+```bash
+pwd
 git rev-parse --show-toplevel
-Get-ChildItem src/app
+node -p "require('./package.json').name"
+rg --files src/app
+```
 
-Do not edit a nested Smart Stock project by mistake.
+## Regla crítica sobre Smart Stock
 
-Active routes
+- **Smart Stock es legacy y de solo lectura** en este repositorio.
+- No tratar Smart Stock como producto activo.
+- Si un archivo/carpeta menciona Smart Stock, asumir contexto de referencia histórica, salvo instrucción explícita del usuario.
 
-The visible Next.js App Router routes must live under:
+## Alcance del producto (MVP)
 
-src/app/page.tsx
-src/app/dashboard/page.tsx
-src/app/dashboard/layout.tsx
-src/app/dashboard/leads/page.tsx
-src/app/dashboard/settings/page.tsx
-src/app/dashboard/bookings/page.tsx
-src/app/dashboard/follow-up/page.tsx
-src/app/dashboard/channels/page.tsx
+Negocio Autónomo se enfoca en:
 
-If a task involves visible UI, always verify that these routes exist and render.
+- captura de leads/mensajes entrantes
+- organización de leads
+- seguimiento (follow-up)
+- reservas (bookings)
+- métricas operativas simples
 
-Product thesis
+Flujo objetivo:
 
-Negocio Autónomo is not:
+`channel connected → inbound event → normalization → lead/conversation → follow-up → booking → metrics`
 
-an inventory app
-a stock management app
-a generic CRM
-a premium agenda only
-a renamed Smart Stock
+## Rutas visibles requeridas (App Router)
 
-Negocio Autónomo is:
+- `src/app/page.tsx`
+- `src/app/dashboard/page.tsx`
+- `src/app/dashboard/layout.tsx`
+- `src/app/dashboard/leads/page.tsx`
+- `src/app/dashboard/settings/page.tsx`
+- `src/app/dashboard/bookings/page.tsx`
+- `src/app/dashboard/follow-up/page.tsx`
+- `src/app/dashboard/channels/page.tsx`
 
-a commercial operating layer for local service businesses
-focused on incoming leads/messages
-focused on follow-up
-focused on bookings
-focused on visibility and simple operational metrics
+## Prioridades MVP
 
-Core future flow:
+1. UI y navegación visibles
+2. plataforma/core de negocio
+3. leads y contactos
+4. conversaciones
+5. bookings
+6. tareas de seguimiento
+7. ingesta de canales
+8. resúmenes IA y next actions
+9. métricas
 
-channel connected → inbound event → normalization → lead/conversation → follow-up → booking → metrics
+## Fuente de verdad
 
-MVP priorities
+- `ARCHITECTURE.md`
+- `PATCH_NOTES.md`
+- `prisma/schema.prisma`
 
-Build in this order:
+Ante conflicto con referencias de Smart Stock, priorizar documentos de Negocio Autónomo.
 
-visible UI and navigation
-business/core platform
-leads and contacts
-conversations
-bookings
-follow-up tasks
-channel ingestion
-AI summaries and next actions
-metrics
+## Comandos de desarrollo
 
-Do not jump to advanced AI, simulations, or omnichannel automation before the visible product and core flows exist.
+Usar **pnpm**:
 
-Source of truth
+- `pnpm dev`
+- `pnpm exec prisma format`
+- `pnpm exec prisma validate`
+- `pnpm exec prisma migrate dev`
+- `pnpm exec prisma generate`
 
-Use these files as project guidance:
+## Implementación
 
-ARCHITECTURE.md
-PATCH_NOTES.md
-prisma/schema.prisma
+- Next.js App Router + TypeScript.
+- Cambios pequeños y revisables.
+- No crear rutas fuera de `src/app`.
+- No dejar template default de Next.js en la app.
+- Evitar terminología de inventario/stock en navegación y copy principal.
 
-If there is a conflict between old Smart Stock references and these documents, follow the Negocio Autónomo documents.
+## Nota sobre AGENTS.override.md
 
-Development commands
+No se crea `AGENTS.override.md` por ahora porque no agrega guardrails concretos adicionales a este contexto.
 
-Use pnpm.
 
-Common commands:
+## Estrategia de legacy
 
-pnpm dev
-pnpm exec prisma format
-pnpm exec prisma validate
-pnpm exec prisma migrate dev
-pnpm exec prisma generate
-
-Implementation rules
-Use Next.js App Router.
-Use TypeScript.
-Keep changes small and reviewable.
-Do not create routes outside src/app.
-Do not leave the app rendering the default Next.js template.
-Do not create placeholder-only architecture without visible routes when UI is requested.
-Do not introduce stock/inventory terminology into the main navigation or product copy.
-If a route is requested, create the actual page.tsx file.
-If data is unavailable, use safe demo data or a useful empty state.
-Required final check for every PR
-
-Before reporting done, verify:
-
-pnpm dev
-
+- Mantener Smart Stock fuera del árbol activo del producto.
+- Rutas legacy permitidas solo en `archive/` y modo **readonly**.
+- La carpeta local `Smart-stock source code/` se ignora en git para evitar cambios accidentales.
