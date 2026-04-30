@@ -92,6 +92,12 @@ enum ActivityActorType {
   AI
 }
 
+enum InboundEventStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
 enum ObjectionCategory {
   PRICE
   TIMING
@@ -121,6 +127,7 @@ model Business {
   followUpTasks      FollowUpTask[]
   activityLogs       ActivityLog[]
   objectionSignals   ObjectionSignal[]
+  inboundEvents      InboundEvent[]
 }
 
 model User {
@@ -153,6 +160,7 @@ model ChannelConnection {
 
   business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
   conversations Conversation[]
+  inboundEvents  InboundEvent[]
 
   @@index([businessId])
   @@index([provider, channelType])
@@ -331,6 +339,28 @@ model ActivityLog {
 
   @@index([businessId, createdAt])
   @@index([entityType, entityId])
+}
+
+model InboundEvent {
+  id                  String             @id @default(cuid())
+  businessId          String
+  channelConnectionId String?
+  provider            ChannelProvider
+  eventType           String
+  payload             Json
+  receivedAt          DateTime           @default(now())
+  status              InboundEventStatus @default(PENDING)
+  attempts            Int                @default(0)
+  lastError           String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  business          Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  channelConnection ChannelConnection? @relation(fields: [channelConnectionId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, provider, status])
+  @@index([channelConnectionId])
+  @@index([receivedAt])
 }
 
 model ObjectionSignal {
