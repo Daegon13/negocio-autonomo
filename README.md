@@ -61,3 +61,34 @@ Smart Stock se conserva **solo como referencia histórica de solo lectura** y no
 - `Smart-stock source code/` está fuera del alcance activo y se mantiene ignorada por git.
 - `archive/legacy-smart-stock-reference/` se conserva como referencia histórica **solo lectura**.
 - Cualquier trabajo de producto debe hacerse en la raíz activa de Negocio Autónomo.
+
+
+## Levantar DB nueva (sin reset destructivo)
+
+1. Configurar `DATABASE_URL` a una base PostgreSQL vacía.
+2. Instalar dependencias:
+
+```bash
+pnpm install
+```
+
+3. Ejecutar migraciones en orden histórico:
+
+```bash
+pnpm exec prisma migrate deploy
+```
+
+4. Validar schema y cliente Prisma:
+
+```bash
+pnpm exec prisma validate
+pnpm exec prisma generate
+```
+
+5. (Opcional) revisar estado:
+
+```bash
+pnpm exec prisma migrate status
+```
+
+Referencia de auditoría y matriz de entidades/enums: `docs_db_audit.md`.
