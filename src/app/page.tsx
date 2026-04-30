@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Inicio",
+  description: "Panel comercial para captar leads, dar seguimiento y cerrar reservas en negocios de servicios.",
+};
 
 export default function HomePage() {
   return (
@@ -11,8 +17,7 @@ export default function HomePage() {
         <div className="space-y-5">
           <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">Negocio Autónomo</h1>
           <p className="max-w-3xl text-lg leading-relaxed text-slate-300 md:text-xl">
-            Convertí mensajes entrantes en reservas: capturá leads, ordená seguimientos y mantené visibilidad del día a
-            día comercial desde un mismo panel.
+            Centralizá tus mensajes entrantes, organizá tus leads y llevá seguimiento hasta convertir en reservas.
           </p>
         </div>
 
@@ -21,11 +26,14 @@ export default function HomePage() {
             href="/dashboard"
             className="rounded-lg bg-cyan-400 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-300"
           >
-            Entrar al dashboard
+            Ir al dashboard
           </Link>
-          <span className="rounded-lg border border-slate-700 px-6 py-3 text-slate-300">
-            Sin configuración compleja: foco en operación visible y accionable
-          </span>
+          <Link
+            href="/dashboard/leads"
+            className="rounded-lg border border-slate-700 px-6 py-3 text-slate-300 transition hover:border-cyan-300 hover:text-cyan-200"
+          >
+            Ver leads
+          </Link>
         </div>
       </section>
     </main>

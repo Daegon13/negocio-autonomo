@@ -1,35 +1,33 @@
-const channels = [
-  { name: "WhatsApp", status: "Conectado", health: "Sincronización al día", action: "Ver conversaciones" },
-  { name: "Instagram", status: "Conectado", health: "2 mensajes sin leer", action: "Ir a bandeja" },
-  { name: "Formulario web", status: "Conectado", health: "Captura activa", action: "Ver nuevos leads" },
-  { name: "Google Business", status: "Pendiente", health: "Requiere autenticación", action: "Iniciar conexión" },
-];
+import type { Metadata } from "next";
+import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Canales",
+  description: "Estado de canales de captura para mensajes y leads entrantes.",
+};
 
 export default function ChannelsPage() {
   return (
     <section className="space-y-6">
       <div>
-        <h2 className="text-3xl font-semibold text-white">Canales conectados</h2>
-        <p className="mt-2 text-slate-300">Estado simulado de fuentes de ingreso de consultas y mensajes.</p>
+        <h2 className="text-3xl font-semibold text-white">Canales</h2>
+        <p className="mt-2 text-slate-300">Conectá orígenes de mensajes para iniciar la captura de leads.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {channels.map((channel) => (
-          <article key={channel.name} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-lg font-semibold text-white">{channel.name}</h3>
-              <span className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-200">{channel.status}</span>
-            </div>
-            <p className="mt-2 text-sm text-slate-300">{channel.health}</p>
-            <button
-              type="button"
-              className="mt-4 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200"
-            >
-              {channel.action}
-            </button>
-          </article>
-        ))}
-      </div>
+      <article className="rounded-xl border border-dashed border-slate-700 bg-slate-900 p-6">
+        <h3 className="text-lg font-medium text-white">No hay canales conectados</h3>
+        <p className="mt-2 text-slate-300">
+          Al activar WhatsApp, Instagram o formularios web, veremos aquí el estado de sincronización y eventos entrantes.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link href="/dashboard/settings" className="rounded-lg border border-slate-700 px-4 py-2 text-sm hover:border-cyan-300">
+            Revisar ajustes
+          </Link>
+          <Link href="/dashboard/leads" className="rounded-lg border border-slate-700 px-4 py-2 text-sm hover:border-cyan-300">
+            Ir a leads
+          </Link>
+        </div>
+      </article>
     </section>
   );
 }
