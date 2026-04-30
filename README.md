@@ -92,3 +92,24 @@ pnpm exec prisma migrate status
 ```
 
 Referencia de auditoría y matriz de entidades/enums: `docs_db_audit.md`.
+
+## Seed demo idempotente
+
+Comando único de ejecución:
+
+```bash
+pnpm db:seed
+```
+
+Este seed crea/actualiza un dataset base coherente del flujo operativo:
+`Business`, `Contact`, `Lead`, `Conversation`, `MessageEvent`, `Booking`, `FollowUpTask`, `ActivityLog`, más evento inbound para trazar el origen.
+
+## Reset y repoblado local (demo)
+
+Para resetear y repoblar todo el entorno local de demo:
+
+```bash
+pnpm db:reset:demo
+```
+
+Esto ejecuta `prisma migrate reset --force` y luego corre el seed idempotente.

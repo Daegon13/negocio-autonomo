@@ -1,33 +1,17 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { prisma } from "@/lib/db/prisma";
+import { getDemoBusinessId } from "@/lib/demo-data";
 
 export const metadata: Metadata = {
   title: "Leads",
   description: "Gestión de leads entrantes por canal, estado y prioridad.",
 };
 
-export default function LeadsPage() {
-  return (
-    <section className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-semibold text-white">Leads</h2>
-        <p className="mt-2 text-slate-300">Organizá tus oportunidades por canal, estado y prioridad.</p>
-      </div>
+export default async function LeadsPage() {
+  const businessId = await getDemoBusinessId();
+  const leads = businessId
+    ? await prisma.lead.findMany({ where: { businessId }, include: { contact: true }, orderBy: { createdAt: "desc" } })
+    : [];
 
-      <article className="rounded-xl border border-dashed border-slate-700 bg-slate-900 p-6">
-        <h3 className="text-lg font-medium text-white">No hay leads cargados</h3>
-        <p className="mt-2 text-slate-300">
-          Cuando conectes un canal o ingreses un contacto manualmente, aparecerá aquí con su historial de actividad.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link href="/dashboard/channels" className="rounded-lg border border-slate-700 px-4 py-2 text-sm hover:border-cyan-300">
-            Conectar canales
-          </Link>
-          <Link href="/dashboard/follow-up" className="rounded-lg border border-slate-700 px-4 py-2 text-sm hover:border-cyan-300">
-            Ver seguimiento
-          </Link>
-        </div>
-      </article>
-    </section>
-  );
+  return <section className="space-y-6"><h2 className="text-3xl font-semibold text-white">Leads ({leads.length})</h2><ul className="space-y-3">{leads.map((lead) => <li key={lead.id} className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-slate-200">{lead.contact?.displayName ?? "Sin contacto"} · {lead.status} · {lead.priority}</li>)}</ul></section>;
 }

@@ -1,49 +1,19 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { prisma } from "@/lib/db/prisma";
+import { getDemoBusinessId } from "@/lib/demo-data";
 
-export const metadata: Metadata = {
-  title: "Resumen",
-  description: "Vista general de leads, seguimiento, reservas y canales de Negocio Autónomo.",
-};
+export const metadata: Metadata = { title: "Resumen", description: "Vista general de leads, seguimiento, reservas y canales de Negocio Autónomo." };
 
-const crossLinks = [
-  { href: "/dashboard/leads", label: "Leads" },
-  { href: "/dashboard/bookings", label: "Reservas" },
-  { href: "/dashboard/follow-up", label: "Seguimiento" },
-  { href: "/dashboard/channels", label: "Canales" },
-  { href: "/dashboard/settings", label: "Ajustes" },
-];
+export default async function DashboardPage() {
+  const businessId = await getDemoBusinessId();
+  const [leads, conversations, tasksOpen, bookings] = businessId
+    ? await Promise.all([
+        prisma.lead.count({ where: { businessId } }),
+        prisma.conversation.count({ where: { businessId } }),
+        prisma.followUpTask.count({ where: { businessId, status: "OPEN" } }),
+        prisma.booking.count({ where: { businessId } }),
+      ])
+    : [0, 0, 0, 0];
 
-export default function DashboardPage() {
-  return (
-    <section className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-semibold text-white">Resumen operativo</h2>
-        <p className="mt-2 text-slate-300">Tu operación está lista. Conectá canales y empezá a capturar actividad real.</p>
-      </div>
-
-      <article className="rounded-xl border border-dashed border-slate-700 bg-slate-900 p-6">
-        <h3 className="text-lg font-medium text-white">Sin datos todavía</h3>
-        <p className="mt-2 text-slate-300">
-          Aún no hay leads, seguimientos ni reservas registradas en este entorno. Cuando lleguen eventos entrantes,
-          este panel mostrará métricas y actividad reciente.
-        </p>
-      </article>
-
-      <div>
-        <h3 className="text-lg font-medium text-white">Ir a secciones</h3>
-        <div className="mt-3 flex flex-wrap gap-3">
-          {crossLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+  return <section className="space-y-6"><h2 className="text-3xl font-semibold text-white">Resumen operativo</h2><div className="grid gap-3 md:grid-cols-2">{[["Leads", leads],["Conversaciones", conversations],["Seguimientos abiertos", tasksOpen],["Reservas", bookings]].map(([k,v]) => <article key={String(k)} className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-slate-200"><p>{k}</p><p className="text-2xl text-white">{v}</p></article>)}</div></section>;
 }
