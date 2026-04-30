@@ -31,6 +31,7 @@ model Store {
   tickets       Ticket[]
   leads         Lead[]
   leadEvents    LeadEvent[]
+  followUpTasks FollowUpTask[]
 
   // Aliases para matcheo (códigos/nombres) desde POS
   productAliases ProductAlias[]
@@ -130,7 +131,8 @@ model Lead {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  events LeadEvent[]
+  events        LeadEvent[]
+  followUpTasks FollowUpTask[]
 
   @@index([storeId, status])
   @@index([storeId, lastActivityAt])
@@ -152,6 +154,33 @@ model LeadEvent {
 
   @@index([leadId, createdAt])
   @@index([storeId, createdAt])
+}
+
+enum FollowUpTaskStatus {
+  OPEN
+  CLOSED
+}
+
+model FollowUpTask {
+  id String @id @default(cuid())
+
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  taskType String
+  priority String             @default("MEDIUM")
+  dueAt    DateTime
+  status   FollowUpTaskStatus @default(OPEN)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  closedAt  DateTime?
+
+  @@index([storeId, status, dueAt])
+  @@index([leadId, taskType, status])
 }
 
 model Account {
