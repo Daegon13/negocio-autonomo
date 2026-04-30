@@ -1,8 +1,14 @@
--- CreateEnum
-CREATE TYPE "InboundEventStatus" AS ENUM ('PENDING', 'PROCESSED', 'FAILED');
+-- CreateEnum (idempotent for partially-migrated environments)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'InboundEventStatus') THEN
+    CREATE TYPE "InboundEventStatus" AS ENUM ('PENDING', 'PROCESSED', 'FAILED');
+  END IF;
+END
+$$;
 
 -- CreateTable
-CREATE TABLE "InboundEvent" (
+CREATE TABLE IF NOT EXISTS "InboundEvent" (
     "id" TEXT NOT NULL,
     "businessId" TEXT NOT NULL,
     "channelConnectionId" TEXT,
@@ -20,16 +26,32 @@ CREATE TABLE "InboundEvent" (
 );
 
 -- CreateIndex
-CREATE INDEX "InboundEvent_businessId_provider_status_idx" ON "InboundEvent"("businessId", "provider", "status");
+CREATE INDEX IF NOT EXISTS "InboundEvent_businessId_provider_status_idx" ON "InboundEvent"("businessId", "provider", "status");
 
 -- CreateIndex
-CREATE INDEX "InboundEvent_channelConnectionId_idx" ON "InboundEvent"("channelConnectionId");
+CREATE INDEX IF NOT EXISTS "InboundEvent_channelConnectionId_idx" ON "InboundEvent"("channelConnectionId");
 
 -- CreateIndex
-CREATE INDEX "InboundEvent_receivedAt_idx" ON "InboundEvent"("receivedAt");
+CREATE INDEX IF NOT EXISTS "InboundEvent_receivedAt_idx" ON "InboundEvent"("receivedAt");
 
--- AddForeignKey
-ALTER TABLE "InboundEvent" ADD CONSTRAINT "InboundEvent_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "Business"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- AddForeignKey (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'InboundEvent_businessId_fkey') THEN
+    ALTER TABLE "InboundEvent"
+      ADD CONSTRAINT "InboundEvent_businessId_fkey"
+      FOREIGN KEY ("businessId") REFERENCES "Business"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END
+$$;
 
--- AddForeignKey
-ALTER TABLE "InboundEvent" ADD CONSTRAINT "InboundEvent_channelConnectionId_fkey" FOREIGN KEY ("channelConnectionId") REFERENCES "ChannelConnection"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+-- AddForeignKey (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'InboundEvent_channelConnectionId_fkey') THEN
+    ALTER TABLE "InboundEvent"
+      ADD CONSTRAINT "InboundEvent_channelConnectionId_fkey"
+      FOREIGN KEY ("channelConnectionId") REFERENCES "ChannelConnection"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+  END IF;
+END
+$$;
