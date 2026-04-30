@@ -54,3 +54,10 @@ pnpm exec prisma generate
 ## Contexto legacy
 
 Smart Stock se conserva **solo como referencia histórica de solo lectura** y no forma parte del producto activo Negocio Autónomo.
+
+
+## Estrategia para assets legacy
+
+- `Smart-stock source code/` está fuera del alcance activo y se mantiene ignorada por git.
+- `archive/legacy-smart-stock-reference/` se conserva como referencia histórica **solo lectura**.
+- Cualquier trabajo de producto debe hacerse en la raíz activa de Negocio Autónomo.

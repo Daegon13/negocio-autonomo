@@ -84,3 +84,10 @@ Usar **pnpm**:
 ## Nota sobre AGENTS.override.md
 
 No se crea `AGENTS.override.md` por ahora porque no agrega guardrails concretos adicionales a este contexto.
+
+
+## Estrategia de legacy
+
+- Mantener Smart Stock fuera del árbol activo del producto.
+- Rutas legacy permitidas solo en `archive/` y modo **readonly**.
+- La carpeta local `Smart-stock source code/` se ignora en git para evitar cambios accidentales.
