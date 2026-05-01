@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { LeadStatus, Priority, TaskType } from "../../../../../../generated/prisma";
+import { LeadStatus, Priority, TaskType } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { getDemoBusinessId } from "@/lib/demo-data";
 

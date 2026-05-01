@@ -1,4 +1,4 @@
-import { ActivityActorType, InboundEventStatus } from "../../../../generated/prisma";
+import { ActivityActorType, InboundEventStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import type { ParsedWebhookEvent } from "@/lib/integrations/webhooks/types";
 

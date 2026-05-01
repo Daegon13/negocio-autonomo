@@ -9,7 +9,7 @@ import type {
   Lead,
   MessageEvent,
   Prisma,
-} from "../../../../generated/prisma";
+} from "@/generated/prisma/client";
 import { prisma } from "../../db/prisma";
 import type {
   CreateActivityLogInput,

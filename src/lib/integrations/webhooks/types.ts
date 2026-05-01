@@ -1,4 +1,4 @@
-import type { ChannelProvider } from "../../../../generated/prisma";
+import type { ChannelProvider } from "@/generated/prisma/client";
 
 export type ParsedWebhookEvent = {
   provider: ChannelProvider;

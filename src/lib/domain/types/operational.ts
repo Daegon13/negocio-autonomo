@@ -6,7 +6,7 @@ import type {
   Priority,
   TaskStatus,
   TaskType,
-} from "../../../../generated/prisma";
+} from "@/generated/prisma/client";
 
 export type CreateBusinessInput = {
   name: string;
