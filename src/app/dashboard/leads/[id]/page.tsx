@@ -20,6 +20,7 @@ export default async function LeadDetailPage({ params }: Props) {
     where: { id, businessId },
     include: {
       contact: true,
+      bookings: { orderBy: { startsAt: "asc" }, take: 10 },
       conversations: { include: { messages: { orderBy: { createdAt: "desc" }, take: 5 } }, orderBy: { updatedAt: "desc" }, take: 1 },
     },
   });
@@ -29,7 +30,7 @@ export default async function LeadDetailPage({ params }: Props) {
   const activities = await prisma.activityLog.findMany({
     where: { businessId, entityType: "lead", entityId: lead.id },
     orderBy: { createdAt: "desc" },
-    take: 10,
+    take: 20,
   });
 
   return (
@@ -40,6 +41,18 @@ export default async function LeadDetailPage({ params }: Props) {
       <LeadDetailClient leadId={lead.id} currentStatus={lead.status} currentNextActionAt={lead.nextActionAt ? new Date(lead.nextActionAt).toISOString().slice(0, 16) : ""} />
 
       <div className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-slate-100">
+        <h3 className="mb-2 text-lg font-medium">Reservas del lead</h3>
+        <ul className="space-y-2">
+          {lead.bookings.map((booking) => (
+            <li key={booking.id} className="rounded border border-slate-700 p-2 text-sm">
+              <div className="text-xs text-slate-400">{booking.status} · {booking.startsAt.toISOString()} → {booking.endsAt.toISOString()}</div>
+              <div>{booking.serviceName}</div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-slate-100">
         <h3 className="mb-2 text-lg font-medium">Contacto</h3>
         <p>{lead.contact?.displayName ?? "Sin contacto"}</p>
         <p>{lead.contact?.phone ?? "Sin teléfono"}</p>
@@ -47,24 +60,12 @@ export default async function LeadDetailPage({ params }: Props) {
       </div>
 
       <div className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-slate-100">
-        <h3 className="mb-2 text-lg font-medium">Últimas interacciones</h3>
-        <ul className="space-y-2">
-          {(lead.conversations[0]?.messages ?? []).map((message) => (
-            <li key={message.id} className="rounded border border-slate-700 p-2">
-              <div className="text-xs text-slate-400">{message.direction} · {message.createdAt.toISOString()}</div>
-              <div>{message.content ?? "(sin contenido)"}</div>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-slate-100">
-        <h3 className="mb-2 text-lg font-medium">Actividad manual</h3>
+        <h3 className="mb-2 text-lg font-medium">Actividad / timeline</h3>
         <ul className="space-y-2">
           {activities.map((item) => (
             <li key={item.id} className="rounded border border-slate-700 p-2 text-sm">
               <div className="text-xs text-slate-400">{item.actionType} · {item.createdAt.toISOString()}</div>
-              <div>{typeof item.payloadJson === "object" && item.payloadJson && "note" in item.payloadJson ? String(item.payloadJson.note) : "Sin detalle"}</div>
+              <div>{JSON.stringify(item.payloadJson)}</div>
             </li>
           ))}
         </ul>
