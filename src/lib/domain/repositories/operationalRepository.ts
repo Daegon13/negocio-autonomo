@@ -87,7 +87,24 @@ export const operationalRepository = {
   updateInboundEventStatus(id: string, status: Prisma.InboundEventUpdateInput["status"], lastError?: string | null) {
     return prisma.inboundEvent.update({
       where: { id },
-      data: { status, lastError: lastError ?? null, attempts: { increment: 1 } },
+      data: {
+        status,
+        lastError: lastError ?? null,
+        errorContextJson: lastError ? { reason: lastError } : Prisma.JsonNull,
+        attempts: { increment: 1 },
+      },
+    });
+  },
+
+  updateInboundEventFailure(id: string, reason: string, errorContextJson?: unknown) {
+    return prisma.inboundEvent.update({
+      where: { id },
+      data: {
+        status: "FAILED",
+        lastError: reason,
+        errorContextJson: (errorContextJson ?? { reason }) as Prisma.InputJsonValue,
+        attempts: { increment: 1 },
+      },
     });
   },
 
@@ -197,19 +214,38 @@ export const operationalRepository = {
             },
           });
 
-      const messageEvent = params.providerMessageId || params.messageContent
-        ? await tx.messageEvent.create({
-            data: {
+      let messageEvent: MessageEvent | null = null;
+      if (params.providerMessageId) {
+        messageEvent = await tx.messageEvent.upsert({
+          where: {
+            businessId_providerMessageId: {
               businessId: params.businessId,
-              conversationId: savedConversation.id,
               providerMessageId: params.providerMessageId,
-              direction: "INBOUND",
-              payloadType: params.payloadType,
-              content: params.messageContent,
-              rawPayload: (params.rawMessagePayload ?? {}) as Prisma.InputJsonValue,
             },
-          })
-        : null;
+          },
+          update: {},
+          create: {
+            businessId: params.businessId,
+            conversationId: savedConversation.id,
+            providerMessageId: params.providerMessageId,
+            direction: "INBOUND",
+            payloadType: params.payloadType,
+            content: params.messageContent,
+            rawPayload: (params.rawMessagePayload ?? {}) as Prisma.InputJsonValue,
+          },
+        });
+      } else if (params.messageContent) {
+        messageEvent = await tx.messageEvent.create({
+          data: {
+            businessId: params.businessId,
+            conversationId: savedConversation.id,
+            direction: "INBOUND",
+            payloadType: params.payloadType,
+            content: params.messageContent,
+            rawPayload: (params.rawMessagePayload ?? {}) as Prisma.InputJsonValue,
+          },
+        });
+      }
 
       return { contact: savedContact, lead: savedLead, conversation: savedConversation, messageEvent };
     });

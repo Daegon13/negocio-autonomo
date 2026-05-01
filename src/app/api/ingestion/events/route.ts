@@ -12,6 +12,9 @@ function isAuthorized(request: NextRequest) {
   const expectedToken = process.env.INTERNAL_INGESTION_TOKEN;
   if (!expectedToken) return false;
 
+  const internalHeaderToken = request.headers.get("x-internal-ingestion-token")?.trim();
+  if (internalHeaderToken && internalHeaderToken === expectedToken) return true;
+
   const authHeader = request.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) return false;
 

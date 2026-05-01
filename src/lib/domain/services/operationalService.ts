@@ -69,9 +69,31 @@ export const operationalService = {
       status: input.status ?? InboundEventStatus.PENDING,
       receivedAt: input.receivedAt,
     });
+    await operationalRepository.createActivityLog({
+      businessId: input.businessId,
+      entityType: "InboundEvent",
+      entityId: inbound.id,
+      actionType: "INBOUND_EVENT_RECEIVED",
+      actorType: ActivityActorType.SYSTEM,
+      payloadJson: { inboundEventId: inbound.id, source: input.source, eventType: input.eventType },
+    });
 
     try {
       const normalized = normalizeInboundPayload(input.payload);
+      await operationalRepository.createActivityLog({
+        businessId: input.businessId,
+        entityType: "InboundEvent",
+        entityId: inbound.id,
+        actionType: "INBOUND_EVENT_NORMALIZED",
+        actorType: ActivityActorType.SYSTEM,
+        payloadJson: {
+          inboundEventId: inbound.id,
+          hasContact: Boolean(normalized.phone || normalized.email),
+          hasMessage: Boolean(normalized.message),
+          externalThreadId: normalized.conversation?.externalThreadId,
+          providerMessageId: normalized.message?.providerMessageId,
+        },
+      });
       const result = await operationalRepository.processInboundEntities({
         inboundEventId: inbound.id,
         businessId: input.businessId,
@@ -108,7 +130,10 @@ export const operationalService = {
       return processed;
     } catch (error) {
       const reason = error instanceof Error ? error.message : "Unknown processing error";
-      const failed = await operationalRepository.updateInboundEventStatus(inbound.id, InboundEventStatus.FAILED, reason);
+      const failed = await operationalRepository.updateInboundEventFailure(inbound.id, reason, {
+        reason,
+        errorName: error instanceof Error ? error.name : "unknown",
+      });
 
       await operationalRepository.createActivityLog({
         businessId: input.businessId,
