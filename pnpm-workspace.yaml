@@ -1,3 +1,7 @@
+packages:
+  - "."
+  - "!archive/**"
+
 allowBuilds:
   '@prisma/engines': true
   prisma: true
