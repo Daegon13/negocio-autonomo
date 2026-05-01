@@ -1,4 +1,4 @@
-import { ActivityActorType, InboundEventStatus } from "../../../../generated/prisma";
+import { ActivityActorType, InboundEventStatus } from "@/generated/prisma/client";
 import { normalizeInboundPayload } from "../normalization/inboundEventNormalizer";
 import { operationalRepository } from "../repositories/operationalRepository";
 import type {

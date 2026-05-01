@@ -1,6 +1,6 @@
 "use client";
 
-import { Priority, TaskStatus, TaskType, type FollowUpTask, type Lead } from "../../../generated/prisma";
+import { Priority, TaskStatus, TaskType, type FollowUpTask, type Lead } from "@/generated/prisma/client";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
