@@ -12,6 +12,12 @@ function asString(value: unknown): string | undefined {
 
 export function normalizeInboundPayload(payload: unknown): NormalizedInboundEvent {
   const root = asRecord(payload) ?? {};
+  const entry = Array.isArray(root.entry) ? asRecord(root.entry[0]) : null;
+  const change = entry && Array.isArray(entry.changes) ? asRecord(entry.changes[0]) : null;
+  const value = asRecord(change?.value);
+  const firstMessage = value && Array.isArray(value.messages) ? asRecord(value.messages[0]) : null;
+  const firstContact = value && Array.isArray(value.contacts) ? asRecord(value.contacts[0]) : null;
+
   const contact = asRecord(root.contact) ?? root;
   const lead = asRecord(root.lead);
   const conversation = asRecord(root.conversation);
@@ -23,8 +29,9 @@ export function normalizeInboundPayload(payload: unknown): NormalizedInboundEven
     asString((contact.firstName ?? "") + " " + (contact.lastName ?? "")) ??
     "Unknown";
 
-  const phone = asString(contact.phone);
+  const phone = asString(contact.phone) ?? asString(firstContact?.wa_id) ?? asString(value?.from);
   const email = asString(contact.email);
+  const messageText = asString(firstMessage?.text && asRecord(firstMessage.text)?.body) ?? asString(root.messageText);
 
   return {
     displayName,
@@ -42,14 +49,15 @@ export function normalizeInboundPayload(payload: unknown): NormalizedInboundEven
       summary: asString(lead?.summary) ?? asString(root.summary),
     },
     conversation: {
-      externalThreadId: asString(conversation?.externalThreadId) ?? asString(root.externalThreadId),
+      externalThreadId:
+        asString(conversation?.externalThreadId) ?? asString(root.externalThreadId) ?? asString(value?.metadata && asRecord(value.metadata)?.phone_number_id),
     },
-    message: message || root.messageText || root.messageId
+    message: message || messageText || root.messageId || firstMessage
       ? {
-          providerMessageId: asString(message?.providerMessageId) ?? asString(root.messageId),
-          payloadType: asString(message?.payloadType) ?? "text",
-          content: asString(message?.content) ?? asString(root.messageText),
-          rawPayload: message ?? root,
+          providerMessageId: asString(message?.providerMessageId) ?? asString(root.messageId) ?? asString(firstMessage?.id),
+          payloadType: asString(message?.payloadType) ?? asString(firstMessage?.type) ?? "text",
+          content: asString(message?.content) ?? messageText,
+          rawPayload: message ?? firstMessage ?? root,
         }
       : undefined,
   };

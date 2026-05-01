@@ -1,0 +1,22 @@
+{
+  "contact": {
+    "displayName": "Carlos Gómez",
+    "phone": "+59899990000",
+    "email": "carlos@example.com",
+    "externalContactId": "contact_123",
+    "providerContactRef": "provider_contact_abc"
+  },
+  "lead": {
+    "externalLeadId": "lead_123",
+    "serviceInterest": "Corte + barba",
+    "summary": "Cliente solicita disponibilidad para sábado"
+  },
+  "conversation": {
+    "externalThreadId": "thread_123"
+  },
+  "message": {
+    "providerMessageId": "provider_msg_123",
+    "payloadType": "text",
+    "content": "¿Tienen lugar este sábado?"
+  }
+}

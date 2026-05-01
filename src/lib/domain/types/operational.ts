@@ -82,4 +82,5 @@ export type CreateInboundEventInput = {
   payload: unknown;
   status?: InboundEventStatus;
   receivedAt?: Date;
+  errorContextJson?: unknown;
 };

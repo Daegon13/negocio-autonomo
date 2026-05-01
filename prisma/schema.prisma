@@ -260,6 +260,7 @@ model MessageEvent {
   @@index([businessId])
   @@index([conversationId])
   @@index([providerMessageId])
+  @@unique([businessId, providerMessageId])
 }
 
 model Booking {
@@ -353,6 +354,7 @@ model InboundEvent {
   status              InboundEventStatus @default(PENDING)
   attempts            Int                @default(0)
   lastError           String?
+  errorContextJson    Json?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
