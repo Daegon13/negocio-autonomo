@@ -13,16 +13,16 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
   if (!booking) return NextResponse.json({ error: "Booking not found" }, { status: 404 });
 
   const updated = await prisma.$transaction(async (tx) => {
-    const nextBooking = await tx.booking.update({ where: { id }, data: { status: "CONFIRMED" } });
+    const nextBooking = await tx.booking.update({ where: { id }, data: { status: "CANCELLED" } });
     if (booking.leadId) {
       await tx.activityLog.create({
         data: {
           businessId,
           entityType: "lead",
           entityId: booking.leadId,
-          actionType: "LEAD_BOOKING_CONFIRMED",
+          actionType: "LEAD_BOOKING_CANCELLED",
           actorType: "SYSTEM",
-          payloadJson: { bookingId: id, bookingStatus: "CONFIRMED" },
+          payloadJson: { bookingId: id, bookingStatus: "CANCELLED" },
         },
       });
     }

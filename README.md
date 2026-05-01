@@ -50,6 +50,7 @@ pnpm exec prisma generate
 - Automatizaciones omnicanal avanzadas.
 - Simulaciones complejas.
 - Funcionalidades enterprise fuera de MVP.
+- Integración/sincronización con calendarios externos (Google/Outlook/Apple).
 
 ## Contexto legacy
 

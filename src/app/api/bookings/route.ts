@@ -43,6 +43,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "leadId or contactId is required" }, { status: 400 });
   }
 
+  if (body.leadId) {
+    const lead = await prisma.lead.findFirst({ where: { id: body.leadId, businessId: body.businessId }, select: { contactId: true } });
+    if (!lead) return NextResponse.json({ error: "Lead not found for this business" }, { status: 404 });
+    body.contactId ??= lead.contactId ?? undefined;
+  }
+
   const startsAt = new Date(body.startsAt ?? "");
   const endsAt = new Date(body.endsAt ?? "");
   if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || startsAt >= endsAt) {
@@ -58,15 +64,23 @@ export async function POST(req: Request) {
     orderBy: { startTime: "asc" },
   });
 
-  const available = activeRules.some((rule) => {
+  const availableRule = activeRules.find((rule) => {
     const ruleStart = parseClockToMinutes(rule.startTime);
     const ruleEnd = parseClockToMinutes(rule.endTime);
     if (ruleStart === null || ruleEnd === null) return false;
     return startMin >= ruleStart && endMin <= ruleEnd;
   });
 
-  if (!available) {
+  if (!availableRule) {
     return NextResponse.json({ error: "Booking outside base availability" }, { status: 409 });
+  }
+
+  const requestedDurationMin = Math.round((endsAt.getTime() - startsAt.getTime()) / 60000);
+  if (requestedDurationMin % availableRule.slotDurationMin !== 0) {
+    return NextResponse.json(
+      { error: `Booking duration must be multiple of ${availableRule.slotDurationMin} minutes` },
+      { status: 409 },
+    );
   }
 
   const overlapping = await prisma.booking.findFirst({
@@ -96,22 +110,19 @@ export async function POST(req: Request) {
     });
 
     if (body.leadId) {
-      await tx.lead.update({
-        where: { id: body.leadId },
-        data: { status: "BOOKED" },
-      });
-
+      await tx.lead.update({ where: { id: body.leadId }, data: { status: "BOOKED" } });
       await tx.activityLog.create({
         data: {
           businessId: body.businessId!,
-          entityType: "LEAD",
+          entityType: "lead",
           entityId: body.leadId,
-          actionType: "LEAD_TO_BOOKING",
+          actionType: "LEAD_BOOKING_CREATED",
           actorType: "SYSTEM",
           payloadJson: {
             bookingId: created.id,
-            fromStatus: "PENDING",
-            toStatus: "BOOKED",
+            bookingStatus: created.status,
+            startsAt: created.startsAt,
+            endsAt: created.endsAt,
           },
         },
       });
