@@ -44,3 +44,12 @@ next-env.d.ts
 # legacy readonly sources (outside active product scope)
 /Smart-stock source code/
 
+
+# Prisma generated client
+src/generated/prisma/
+generated/prisma/
+.prisma/
+
+# Environment
+.env
+.env.local

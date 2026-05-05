@@ -35,5 +35,10 @@
   },
   "prisma": {
     "seed": "node prisma/seed.mjs"
+  },
+  "scripts": {
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "db:migrate": "prisma migrate dev"
   }
 }
