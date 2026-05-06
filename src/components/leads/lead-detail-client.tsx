@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { LeadStatus } from "@prisma/client";
+import { LeadStatus } from "@/generated/prisma/browser";
 
 type Props = {
   leadId: string;
