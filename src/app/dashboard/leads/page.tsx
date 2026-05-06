@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LeadStatus, Priority } from "@prisma/client";
+import { LeadStatus, Priority } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { getDemoBusinessId } from "@/lib/demo-data";
 
